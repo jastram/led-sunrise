@@ -19,7 +19,7 @@ def dimming(status):
   while switch_state == 0:
     time.sleep(0.05)
     diff = abs(pi.get_current_tick() - last_tick)
-    if (diff > 3*1000000):
+    if (diff > 1.7*1000000):
       if (status == 0): # Was off
         lighteffects.down()
       else: # Was on
@@ -27,12 +27,13 @@ def dimming(status):
 
 # Register Button listener
 def button(gpio, level, tick):
+  button_running = 1
   global switch_state
   global last_tick
   diff = abs(tick - last_tick)
   last_tick = tick
-  if diff > 1000:
-    print("Button triggered")
+  if diff > 1000 and level != switch_state:
+    print("Button triggered: " + str(level) + " - " + str(diff))
     switch_state = level
     if level == 0:
       thr = threading.Thread(target=dimming, args=(lighteffects.is_on(),), kwargs={})
