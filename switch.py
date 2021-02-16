@@ -19,13 +19,15 @@ pi = pigpio.pi()
 
 # Wait for button release 
 def dimming(status):
-  time.sleep(0.05)
-  diff = abs(pi.get_current_tick() - last_tick)
-  if (diff > 1.7*1000000):
-    if (status == 0): # Was off
-      lighteffects.down()
-    else: # Was on
-      lighteffects.up()
+  lighteffects.toggle()
+  while switch_state == 0:
+    time.sleep(0.05)
+    diff = abs(pi.get_current_tick() - last_tick)
+    if (diff > 1.7*1000000):
+      if (status == 0): # Was off
+        lighteffects.down()
+      else: # Was on
+        lighteffects.up()
 
 # Register Button listener
 def button(gpio, level, tick):
@@ -33,17 +35,15 @@ def button(gpio, level, tick):
   global switch_state
   global last_tick
   global dimming_thread
-  if dimming_thread != None and dimming_thread.is_alive():
-    return;
   diff = abs(tick - last_tick)
   last_tick = tick
   if diff > 1000 and level != switch_state:
     print("Button triggered: " + str(level) + " - " + str(diff))
     switch_state = level
     if level == 0:
-      dimming_thread = threading.Thread(target=dimming, args=(lighteffects.is_on(),), kwargs={})
-      dimming_thread.start()
-      lighteffects.toggle()     
+      if dimming_thread == None or not dimming_thread.is_alive():
+        dimming_thread = threading.Thread(target=dimming, args=(lighteffects.is_on(),), kwargs={})
+        dimming_thread.start()
 
 pi.set_pull_up_down(SWITCH, pigpio.PUD_UP)
 pi.callback(SWITCH, pigpio.EITHER_EDGE, button)
