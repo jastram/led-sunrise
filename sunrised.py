@@ -19,8 +19,7 @@ sched = BackgroundScheduler()
 sched.start()
 
 #sched.add_job(quicksun, 'cron', second=00)
-# sched.add_job(morning, 'cron', hour=6, minute=15, second=00, day_of_week='mon-fri')
-sched.add_job(morning, 'cron', hour=6, minute=45, second=00, day_of_week='mon-fri')
+sched.add_job(morning, 'cron', hour=6, minute=15, second=00, day_of_week='mon-fri')
 sched.add_job(morning, 'cron', hour=9, minute=30, second=00, day_of_week='sat-sun')
      
 # Event-Driven program: Wait forever

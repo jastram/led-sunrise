@@ -11,33 +11,38 @@ last_tick = 0
 # global variable to track switch state
 switch_state = 1
 
+# global variable of active dimming thread
+dimming_thread = None
+
 # Reference to pi
 pi = pigpio.pi()
 
 # Wait for button release 
 def dimming(status):
-  while switch_state == 0:
-    time.sleep(0.05)
-    diff = abs(pi.get_current_tick() - last_tick)
-    if (diff > 1.7*1000000):
-      if (status == 0): # Was off
-        lighteffects.down()
-      else: # Was on
-        lighteffects.up()
+  time.sleep(0.05)
+  diff = abs(pi.get_current_tick() - last_tick)
+  if (diff > 1.7*1000000):
+    if (status == 0): # Was off
+      lighteffects.down()
+    else: # Was on
+      lighteffects.up()
 
 # Register Button listener
 def button(gpio, level, tick):
-  button_running = 1
+  global button_running
   global switch_state
   global last_tick
+  global dimming_thread
+  if dimming_thread != None and dimming_thread.is_alive():
+    return;
   diff = abs(tick - last_tick)
   last_tick = tick
   if diff > 1000 and level != switch_state:
     print("Button triggered: " + str(level) + " - " + str(diff))
     switch_state = level
     if level == 0:
-      thr = threading.Thread(target=dimming, args=(lighteffects.is_on(),), kwargs={})
-      thr.start()
+      dimming_thread = threading.Thread(target=dimming, args=(lighteffects.is_on(),), kwargs={})
+      dimming_thread.start()
       lighteffects.toggle()     
 
 pi.set_pull_up_down(SWITCH, pigpio.PUD_UP)
