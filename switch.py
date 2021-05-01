@@ -19,11 +19,12 @@ pi = pigpio.pi()
 
 # Wait for button release 
 def dimming(status):
-  global last_tick
+  now = pi.get_current_tick()
+  global switch_state
   lighteffects.toggle()
   while switch_state == 0: # Stop once released
     time.sleep(0.05) # Dimming speed
-    diff = abs(pi.get_current_tick() - last_tick)
+    diff = abs(pi.get_current_tick() - now)
     if (diff > 1.7*1000000): # Wait for a little
       if (status == 0): # Was off
         lighteffects.down()
