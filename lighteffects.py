@@ -1,6 +1,7 @@
 import pigpio
 import time
 import numpy
+import switch
 import scipy as sp
 from scipy.interpolate import interp1d
 
